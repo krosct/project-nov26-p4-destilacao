@@ -1,0 +1,70 @@
+# ===== Segredos =====
+.env
+.env.*
+!.env.example
+
+# ===== Python / uv =====
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+
+# ===== Testes, lint e cobertura =====
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ===== Notebooks =====
+.ipynb_checkpoints/
+
+# ===== Dados (só o README de cada pasta vai pro Git) =====
+data/*
+!data/README.md
+
+# ===== Modelos e checkpoints =====
+models/
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+*.onnx
+*.joblib
+*.pkl
+
+# ===== Experimentos e logs =====
+mlruns/
+mlartifacts/
+wandb/
+lightning_logs/
+outputs/
+*.log
+
+# ===== Índices vetoriais e caches (P3) =====
+chroma/
+*.faiss
+.cache/
+.gradio/
+
+# ===== Sistema e editores =====
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.json
+
+# ===== Dados brutos (Olist) =====
+# data/raw/ é ignorado por data/*; os CSVs derivados abaixo são versionados
+!data/taxonomia.md
+!data/referencia.csv
+!data/rotulos_llm.csv
+!data/amostra_treino.csv
+
+# ===== Checkpoints e modelos locais =====
+# models/ e checkpoints/ já são ignorados acima
