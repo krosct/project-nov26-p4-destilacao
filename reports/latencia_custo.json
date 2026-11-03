@@ -1,0 +1,28 @@
+{
+  "hardware": "Intel(R) Core(TM) 5 120U, 2 threads (torch.set_num_threads)",
+  "premissas": {
+    "data_consulta": "2026-11-03",
+    "llm_entrada_usd_por_1m_tokens": 0.6,
+    "llm_saida_usd_por_1m_tokens": 2.4,
+    "cpu_usd_por_hora": 0.1
+  },
+  "latencia_ms_p50": {
+    "tfidf_cpu": 0.42,
+    "bertimbau_cpu": 36.4,
+    "llm_api": 3628.0
+  },
+  "custo_usd_por_1m_reclamacoes": {
+    "llm_uma_por_requisicao": 1115.19,
+    "llm_em_lotes_de_20": 304.44,
+    "bertimbau_cpu": 2.4
+  },
+  "detalhes": {
+    "n_local": 100,
+    "n_llm": 20,
+    "tokens_por_reclamacao_llm_individual": [
+      737,
+      280
+    ],
+    "bertimbau_reclamacoes_por_hora_cpu": 41603
+  }
+}
