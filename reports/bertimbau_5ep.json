@@ -1,76 +1,109 @@
 {
   "base": "neuralmind/bert-base-portuguese-cased",
   "epocas": 5,
-  "n_treino": 2700,
-  "n_validacao": 300,
-  "f1_macro_validacao": 0.837,
-  "acuracia": 0.913,
-  "f1_macro": 0.875,
-  "kappa": 0.894,
+  "melhor_epoca": 3,
+  "n_treino": 5400,
+  "n_validacao": 600,
+  "f1_macro_validacao": 0.845,
+  "acuracia": 0.876,
+  "f1_macro": 0.844,
+  "kappa": 0.85,
   "matriz_confusao": [
     [
-      39,
-      1,
-      0,
-      0,
-      1,
-      0,
-      0
-    ],
-    [
-      0,
-      26,
-      0,
-      0,
-      0,
-      0,
-      0
-    ],
-    [
-      0,
-      1,
-      23,
-      1,
-      0,
-      0,
-      0
-    ],
-    [
-      0,
-      0,
-      1,
-      26,
-      1,
-      0,
-      1
-    ],
-    [
-      0,
-      0,
-      0,
-      0,
-      10,
-      0,
-      0
-    ],
-    [
-      0,
-      0,
-      0,
-      0,
-      1,
-      8,
-      1
-    ],
-    [
-      1,
-      0,
+      104,
       3,
       0,
       0,
+      2,
+      3,
+      3
+    ],
+    [
+      1,
+      63,
+      2,
+      1,
       0,
-      5
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      79,
+      1,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      10,
+      70,
+      0,
+      0,
+      1
+    ],
+    [
+      2,
+      0,
+      1,
+      2,
+      29,
+      3,
+      4
+    ],
+    [
+      0,
+      0,
+      4,
+      0,
+      1,
+      27,
+      3
+    ],
+    [
+      1,
+      0,
+      5,
+      0,
+      1,
+      1,
+      22
     ]
   ],
-  "pico_memoria_gpu_mb": 2206
+  "pico_memoria_gpu_mb": 2268,
+  "historico": [
+    {
+      "epoca": 1,
+      "loss_treino": 1.2217,
+      "loss_validacao": 0.5019,
+      "f1_validacao": 0.8107
+    },
+    {
+      "epoca": 2,
+      "loss_treino": 0.3881,
+      "loss_validacao": 0.4006,
+      "f1_validacao": 0.8312
+    },
+    {
+      "epoca": 3,
+      "loss_treino": 0.1817,
+      "loss_validacao": 0.4329,
+      "f1_validacao": 0.8449
+    },
+    {
+      "epoca": 4,
+      "loss_treino": 0.0871,
+      "loss_validacao": 0.4705,
+      "f1_validacao": 0.8373
+    },
+    {
+      "epoca": 5,
+      "loss_treino": 0.0434,
+      "loss_validacao": 0.4797,
+      "f1_validacao": 0.8381
+    }
+  ]
 }
