@@ -17,24 +17,24 @@ unzip -o data/raw/olist.zip olist_order_reviews_dataset.csv -d data/raw && rm da
 | Arquivo | Conteúdo | Gerado por |
 |---|---|---|
 | `taxonomia.md` | 7 classes, definições, exemplos e regras de desempate | — |
-| `referencia.csv` | 150 reclamações rotuladas segundo a taxonomia (**nunca usadas no treino**) | `scripts/amostrar.py` + rotulação |
-| `amostra_treino.csv` | 3.000 reclamações para treino, sem rótulo | `scripts/amostrar.py` |
-| `rotulos_llm.csv` | as 3.000 reclamações rotuladas pelo LLM professor | `scripts/rotular_llm.py` |
+| `referencia.csv` | 450 reclamações rotuladas segundo a taxonomia (**nunca usadas no treino**) | `scripts/amostrar.py` + rotulação |
+| `amostra_treino.csv` | 6.000 reclamações para treino, sem rótulo | `scripts/amostrar.py` |
+| `rotulos_llm.csv` | as 6.000 reclamações rotuladas pelo LLM professor | `scripts/rotular_llm.py` |
 
 ## Amostragem
 
-Avaliações com nota ≤ 3 e comentário de pelo menos 20 caracteres, sem textos duplicados: 13.142 elegíveis. Sorteio com `random_state=42` de 3.150, divididas em 150 de referência e 3.000 de treino, sem sobreposição.
+Avaliações com nota ≤ 3 e comentário de pelo menos 20 caracteres, sem textos duplicados: 13.142 elegíveis. Sorteio com `random_state=42` de 6.450, divididas em 450 de referência e 6.000 de treino, sem sobreposição. Com a mesma semente, aumentar a amostra só acrescenta itens ao fim do sorteio; `amostrar.py` preserva os rótulos de referência já existentes.
 
 Distribuição das classes:
 
 | Classe | Referência | Treino (rótulos do LLM) |
 |---|---|---|
-| `nao_recebido` | 41 | 791 |
-| `defeito_ou_qualidade` | 29 | 432 |
-| `pedido_incompleto` | 26 | 503 |
-| `produto_errado` | 25 | 563 |
-| `atraso_ou_entrega` | 10 | 248 |
-| `atendimento_ou_cobranca` | 10 | 211 |
-| `outro` | 9 | 252 |
+| `nao_recebido` | 115 | 1.563 |
+| `produto_errado` | 81 | 1.117 |
+| `defeito_ou_qualidade` | 81 | 892 |
+| `pedido_incompleto` | 67 | 1.011 |
+| `atraso_ou_entrega` | 41 | 496 |
+| `atendimento_ou_cobranca` | 35 | 408 |
+| `outro` | 30 | 513 |
 
 Os comentários vêm como foram escritos pelos clientes. A Olist substituiu nomes de lojas por nomes de casas de *Game of Thrones* ("stark", "lannister", "targaryen"), o que aparece nos textos.
