@@ -1,12 +1,13 @@
 """Publica o modelo no Hugging Face Hub com model card gerado a partir dos relatórios.
 
-Uso: HF_TOKEN=... uv run --group train python scripts/publicar.py
+Uso: uv run --group train python scripts/publicar.py   (HF_TOKEN no .env.shared)
 """
 
 import json
 import os
 from pathlib import Path
 
+from dotenv import find_dotenv, load_dotenv
 from huggingface_hub import HfApi
 
 RAIZ = Path(__file__).resolve().parents[1]
@@ -55,7 +56,7 @@ Código, dados e avaliação: [github.com/krosct/project-nov26-p4-destilacao](ht
 `atraso_ou_entrega` · `atendimento_ou_cobranca` · `outro`
 (definições e regras de desempate em [`data/taxonomia.md`](https://github.com/krosct/project-nov26-p4-destilacao/blob/main/data/taxonomia.md))
 
-## Resultados (conjunto de referência, 150 reclamações nunca usadas no treino)
+## Resultados (conjunto de referência, {sum(map(sum, bert["matriz_confusao"]))} reclamações nunca usadas no treino)
 
 | Modelo | F1 macro | Acurácia | Kappa | Latência p50 | Custo / 1M reclamações |
 |---|---|---|---|---|---|
@@ -79,7 +80,7 @@ clf("Comprei 2 unidades e só veio uma na caixa.")
 - {bert["n_treino"] + bert["n_validacao"]} reclamações (nota ≤ 3) do
   [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
   (CC BY-NC-SA 4.0), rotuladas pelo LLM professor; 10% separados para escolher a melhor época.
-- Fine-tuning de `neuralmind/bert-base-portuguese-cased`: até 5 épocas (melhor checkpoint pela validação: época 4), lr 2e-5, lote 16,
+- Fine-tuning de `neuralmind/bert-base-portuguese-cased`: até {bert["epocas"]} épocas (melhor checkpoint pela validação: época {bert["melhor_epoca"]}), lr 2e-5, lote 16,
   textos truncados em 128 tokens, fp16.
 
 ## Uso pretendido e limitações
@@ -96,6 +97,7 @@ clf("Comprei 2 unidades e só veio uma na caixa.")
 
 
 def main() -> None:
+    load_dotenv(find_dotenv(".env.shared", usecwd=True))
     api = HfApi(token=os.environ["HF_TOKEN"])
     pasta = RAIZ / "models/bertimbau-triagem"
     (pasta / "README.md").write_text(model_card())
