@@ -44,6 +44,19 @@ def test_lote_com_numero_faltando_tenta_de_novo(monkeypatch):
     assert "inválida" in recebidas[1][-1]["content"]
 
 
+def test_uso_soma_tokens_de_todas_as_tentativas(monkeypatch):
+    respostas = iter(
+        [
+            '[{"n": 1, "rotulo": "nao_recebido"}]',  # inválida: faltou o 2
+            '[{"n": 1, "rotulo": "nao_recebido"}, {"n": 2, "rotulo": "outro"}]',
+        ]
+    )
+    monkeypatch.setattr(rotular, "chamar_llm", lambda m, modelo: resposta(next(respostas)))
+    uso = rotular.Uso()
+    rotular.rotular(["a", "b"], tamanho_lote=2, uso=uso)
+    assert (uso.requisicoes, uso.tokens_entrada, uso.tokens_saida) == (2, 20, 10)
+
+
 def test_rotulo_fora_da_taxonomia_e_rejeitado(monkeypatch):
     monkeypatch.setattr(
         rotular, "chamar_llm", lambda m, modelo: resposta('[{"n": 1, "rotulo": "frete"}]')
@@ -62,7 +75,7 @@ def test_metricas_caso_conhecido():
 
 def test_referencia_rotulada_e_separada_do_treino():
     ref = list(csv.DictReader(open(RAIZ / "data/referencia.csv")))
-    assert len(ref) == 150 and all(r["rotulo"] in CLASSES for r in ref)
+    assert len(ref) == 450 and all(r["rotulo"] in CLASSES for r in ref)
     caminho = RAIZ / "data/rotulos_llm.csv"
     if not caminho.exists():
         pytest.skip("rótulos do LLM ainda não gerados")
