@@ -1,6 +1,6 @@
 # Destilação de LLM para triagem de reclamações
 
-Um LLM de 550B parâmetros rotula reclamações reais de clientes em 7 categorias de problema; um BERTimbau de 110M parâmetros é treinado nesses rótulos e entrega **90% da qualidade do LLM, ~110× mais rápido e ~600× mais barato**. Modelo publicado no Hugging Face.
+Um LLM de 550B parâmetros rotula reclamações reais de clientes em 7 categorias de problema; um BERTimbau de 110M parâmetros é treinado nesses rótulos e entrega **~90% da qualidade do LLM (F1 0,844 contra 0,942), ~110× mais rápido e ~170× mais barato** que o LLM em lotes (~600× contra uma chamada por reclamação). Modelo publicado no Hugging Face.
 
 [![CI](https://github.com/krosct/project-nov26-p4-destilacao/actions/workflows/ci.yml/badge.svg)](https://github.com/krosct/project-nov26-p4-destilacao/actions/workflows/ci.yml) · [Modelo no Hugging Face](https://huggingface.co/trebuchetly/bertimbau-triagem-reclamacoes)
 
@@ -18,7 +18,11 @@ Avaliação em **450 reclamações de referência**, separadas antes de tudo e n
 | **BERTimbau aluno — 110M (CPU)** | **0,844** | **0,876** | **0,850** | **35 ms** | **US$ 1,79** |
 | TF-IDF + regressão logística (CPU) | 0,765 | 0,798 | 0,757 | 0,4 ms | — |
 
-- O aluno recupera **90% do F1 do professor** (0,844 / 0,942) e fica **8 pontos acima** do baseline clássico.
+- O aluno recupera **~90% do F1 do professor** (0,844 / 0,942; IC95 da razão 0,85–0,93) e fica **8 pontos acima** do baseline clássico.
+- **Incerteza (bootstrap pareado, 2.000 reamostragens, seed 42):** F1 do aluno IC95 **0,80–0,88**; aluno − TF-IDF **+0,03 a +0,12**; professor − aluno **+0,06 a +0,14**. Nenhum intervalo cruza zero, então a ordem professor > aluno > TF-IDF se sustenta; a distância exata, não. Previsões por item em [`reports/previsoes_referencia.csv`](reports/previsoes_referencia.csv) e métricas em [`reports/auditoria.json`](reports/auditoria.json) (`scripts/auditoria.py`).
+- **Ambiente da avaliação:** as métricas da tabela vêm do relatório do treino (GPU, fp16). Reavaliado em CPU fp32 (o cenário de produção), o aluno dá F1 0,841; a diferença de 0,003 é do ambiente numérico.
+- **Quase duplicatas:** 14 das 450 reclamações de referência (3%) tinham texto igual, após normalizar caixa e pontuação, a algum texto do treino (frases curtas como "NÃO RECEBI O PRODUTO"). Medido no modelo treinado antes da correção, sem elas (n = 436) o F1 do professor foi 0,940, o do aluno 0,836 e o do TF-IDF 0,758: o efeito é pequeno. **Já foram retiradas do treino** (29 linhas; 5.971 restam) em `scripts/amostrar.py`, com a referência intacta. ⚠️ **Os números e o modelo publicado desta página ainda vêm do treino anterior, com as 14 quase duplicatas**; o BERTimbau e o TF-IDF precisam ser retreinados (`scripts/pipeline.py --de baseline`) e a tabela, atualizada.
+- **Custo:** o "~600×" compara com o LLM chamado uma reclamação por vez (US$ 1.086); como a qualidade de 0,942 foi medida em lotes de 20, a comparação equivalente é com US$ 308, ou seja, **~170×**.
 - Latência (mediana) medida uma reclamação por vez, nas mesmas 100 reclamações sorteadas da referência para os três modelos, num Intel Core 5 120U com 2 threads; custo do LLM pelo preço da versão paga do mesmo modelo (US$ 0,60/US$ 2,40 por milhão de tokens de entrada/saída, consultado em 03/11/2026); custo da CPU assumindo US$ 0,10/h e a vazão medida em lotes de 32 sobre as 450 da referência (56 mil reclamações/hora). Medições locais variam com a carga da máquina: em execuções seguidas, a latência do BERTimbau ficou entre 35 e 54 ms. Premissas em [`reports/latencia_custo.json`](reports/latencia_custo.json).
 
 ![Matriz de confusão](reports/matriz_confusao.png)
@@ -31,7 +35,7 @@ Os erros se concentram nas classes menores e mais vagas: `atraso_ou_entrega` (re
 flowchart LR
     O["Olist: 13.142 reclamações<br/>nota ≤ 3"] --> S["amostra 6.450<br/>seed 42"]
     S --> R["450 referência<br/>rotuladas pela taxonomia"]
-    S --> T["6.000 treino"]
+    S --> T["5.971 treino<br/>(sem quase duplicatas)"]
     T --> P["LLM professor<br/>lotes de 20"]
     P --> Y["rótulos do LLM"]
     Y --> B["BERTimbau<br/>90% treino / 10% validação"]
@@ -81,5 +85,5 @@ clf("Comprei 2 unidades e só veio uma na caixa.")
 - **Domínio:** reclamações de e-commerce. Em delivery de comida, entrega e qualidade têm outros padrões (comida fria, item trocado); seria preciso reavaliar e, provavelmente, novos rótulos.
 - **Uma classe por texto:** reclamações com vários problemas recebem só o principal; multirrótulo é o passo natural.
 - **Ruído do professor:** o aluno herda os erros do LLM; na referência o professor erra 22 de 450, sobretudo entre `defeito_ou_qualidade` e `produto_errado`.
-- **Referência:** 450 exemplos, com no mínimo 30 por classe, rotulados por um único anotador; os intervalos de confiança por classe ainda são largos para as menores.
+- **Referência:** 450 exemplos, com no mínimo 30 por classe, rotulados segundo a taxonomia, em duas rodadas (150 + 300), sem acesso às respostas do professor. O professor concorda 98,0% com as 150 primeiras e 93,7% com as 300 novas (p ≈ 0,06, Fisher): sem mudança de prompt entre as rodadas, a diferença vem de variação de critério do anotador ou do acaso (as 150 primeiras podem ser mais fáceis). Não foi medida a consistência da rotulação entre rodadas (kappa intra-anotador), então o teto de qualidade da referência é desconhecido. Os intervalos de confiança por classe ainda são largos para as menores.
 - Próximos experimentos: curva de quantidade de rótulos (500 / 1.000 / 3.000 / 6.000), LoRA num LLM pequeno e calibração da confiança para mandar casos incertos ao LLM (arquitetura em cascata).
