@@ -11,6 +11,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from project_nov26_p4_destilacao.normalizacao import sem_quase_duplicatas
+
 RAIZ = Path(__file__).resolve().parents[1]
 SEED = 42
 N_REFERENCIA, N_TREINO = 450, 6000
@@ -32,6 +34,11 @@ def main() -> None:
     amostra = amostra[list(colunas)].rename(columns=colunas)
     referencia, treino = amostra.iloc[:N_REFERENCIA], amostra.iloc[N_REFERENCIA:]
     assert not set(referencia["id"]) & set(treino["id"])  # sem vazamento para o teste
+    # Textos que só diferem em caixa ou pontuação ("NÃO RECEBI O PRODUTO") também vazam: saem do
+    # treino. A referência não muda, então os rótulos e as métricas continuam comparáveis.
+    antes = len(treino)
+    treino = sem_quase_duplicatas(treino, referencia)
+    print(f"quase duplicatas removidas do treino: {antes - len(treino)}")
 
     # Reaproveita os rótulos que já existem; itens novos ficam com rotulo vazio
     arquivo_ref = RAIZ / "data/referencia.csv"

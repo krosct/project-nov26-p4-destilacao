@@ -81,3 +81,17 @@ def test_referencia_rotulada_e_separada_do_treino():
         pytest.skip("rótulos do LLM ainda não gerados")
     treino = {r["id"] for r in csv.DictReader(open(caminho))}
     assert not treino & {r["id"] for r in ref}
+
+
+def test_treino_nao_tem_quase_duplicatas_da_referencia():
+    import pandas as pd
+
+    from project_nov26_p4_destilacao.normalizacao import normalizar, sem_quase_duplicatas
+
+    ref = pd.read_csv(RAIZ / "data/referencia.csv")
+    treino = pd.read_csv(RAIZ / "data/rotulos_llm.csv")
+    assert not set(normalizar(treino["texto"])) & set(normalizar(ref["texto"]))
+    # a função remove "NÃO RECEBI O PRODUTO!" quando "Não recebi o produto" está na referência
+    fake_ref = pd.DataFrame({"texto": ["Não recebi o produto"]})
+    fake_tr = pd.DataFrame({"texto": ["NÃO RECEBI O PRODUTO!", "Chegou quebrado"]})
+    assert sem_quase_duplicatas(fake_tr, fake_ref)["texto"].tolist() == ["Chegou quebrado"]
