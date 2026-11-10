@@ -1,0 +1,39 @@
+{
+  "ambiente": "CPU, fp32 (o relatório do treino, bertimbau.json, usa GPU fp16)",
+  "n_referencia": 450,
+  "f1_macro": {
+    "professor": 0.942,
+    "aluno": 0.841,
+    "tfidf": 0.765
+  },
+  "ic95_bootstrap": {
+    "aluno": [
+      0.799,
+      0.878
+    ],
+    "aluno_menos_tfidf": [
+      0.034,
+      0.121
+    ],
+    "prof_menos_aluno": [
+      0.061,
+      0.142
+    ],
+    "razao": [
+      0.851,
+      0.934
+    ]
+  },
+  "reamostragens": 2000,
+  "quase_duplicatas_no_treino": 14,
+  "f1_macro_sem_quase_duplicatas": {
+    "n": 436,
+    "professor": 0.94,
+    "aluno": 0.836,
+    "tfidf": 0.758
+  },
+  "concordancia_professor": {
+    "150_primeiras": 0.98,
+    "300_novas": 0.937
+  }
+}

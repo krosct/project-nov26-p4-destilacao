@@ -1,4 +1,4 @@
-"""Roda o projeto inteiro, em ordem: amostra → professor → baseline → aluno → figuras → latência.
+"""Roda o projeto inteiro: amostra → professor → baseline → aluno → auditoria → figuras → latência.
 
 Uso: uv run --group train python scripts/pipeline.py [opções]
   --de rotular       começa nesta etapa (as anteriores já rodaram)
@@ -25,6 +25,7 @@ ETAPAS = {
     "rotular": ["scripts/rotular_llm.py"],
     "baseline": ["scripts/baseline.py"],
     "finetune": ["scripts/finetune.py"],
+    "auditoria": ["scripts/auditoria.py"],
     "figuras": ["scripts/figuras.py"],
     "latencia": ["scripts/latencia.py"],
     "testes": ["-m", "pytest", "-q"],
