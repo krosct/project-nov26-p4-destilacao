@@ -1,6 +1,6 @@
 # Destilação de LLM para triagem de reclamações
 
-Um LLM de 550B parâmetros rotula reclamações reais de clientes em 7 categorias de problema; um BERTimbau de 110M parâmetros é treinado nesses rótulos e entrega **~90% da qualidade do LLM (F1 0,844 contra 0,942), ~110× mais rápido e ~170× mais barato** que o LLM em lotes (~600× contra uma chamada por reclamação). Modelo publicado no Hugging Face.
+Um LLM de 550B parâmetros rotula reclamações reais de clientes em 7 categorias de problema; um BERTimbau de 110M parâmetros é treinado nesses rótulos e entrega **~91% da qualidade do LLM (F1 0,859 contra 0,942), ~106× mais rápido e ~170× mais barato** que o LLM em lotes (~600× contra uma chamada por reclamação). Modelo publicado no Hugging Face.
 
 [![CI](https://github.com/krosct/project-nov26-p4-destilacao/actions/workflows/ci.yml/badge.svg)](https://github.com/krosct/project-nov26-p4-destilacao/actions/workflows/ci.yml) · [Modelo no Hugging Face](https://huggingface.co/trebuchetly/bertimbau-triagem-reclamacoes)
 
@@ -15,19 +15,19 @@ Avaliação em **450 reclamações de referência**, separadas antes de tudo e n
 | Modelo | F1 macro | Acurácia | Kappa | Latência p50 | Custo / 1M reclamações |
 |---|---|---|---|---|---|
 | LLM professor — Nemotron 3 Ultra 550B (API) | 0,942 | 0,951 | 0,941 | 3.742 ms | US$ 1.086 (uma por chamada) · US$ 308 (lotes de 20) |
-| **BERTimbau aluno — 110M (CPU)** | **0,844** | **0,876** | **0,850** | **35 ms** | **US$ 1,79** |
-| TF-IDF + regressão logística (CPU) | 0,765 | 0,798 | 0,757 | 0,4 ms | — |
+| **BERTimbau aluno — 110M (CPU)** | **0,859** | **0,887** | **0,864** | **35 ms** | **US$ 1,84** |
+| TF-IDF + regressão logística (CPU) | 0,763 | 0,798 | 0,757 | 0,4 ms | — |
 
-- O aluno recupera **~90% do F1 do professor** (0,844 / 0,942; IC95 da razão 0,85–0,93) e fica **8 pontos acima** do baseline clássico.
-- **Incerteza (bootstrap pareado, 2.000 reamostragens, seed 42):** F1 do aluno IC95 **0,80–0,88**; aluno − TF-IDF **+0,03 a +0,12**; professor − aluno **+0,06 a +0,14**. Nenhum intervalo cruza zero, então a ordem professor > aluno > TF-IDF se sustenta; a distância exata, não. Previsões por item em [`reports/previsoes_referencia.csv`](reports/previsoes_referencia.csv) e métricas em [`reports/auditoria.json`](reports/auditoria.json) (`scripts/auditoria.py`).
-- **Ambiente da avaliação:** as métricas da tabela vêm do relatório do treino (GPU, fp16). Reavaliado em CPU fp32 (o cenário de produção), o aluno dá F1 0,841; a diferença de 0,003 é do ambiente numérico.
-- **Quase duplicatas:** 14 das 450 reclamações de referência (3%) tinham texto igual, após normalizar caixa e pontuação, a algum texto do treino (frases curtas como "NÃO RECEBI O PRODUTO"). Medido no modelo treinado antes da correção, sem elas (n = 436) o F1 do professor foi 0,940, o do aluno 0,836 e o do TF-IDF 0,758: o efeito é pequeno. **Já foram retiradas do treino** (29 linhas; 5.971 restam) em `scripts/amostrar.py`, com a referência intacta. ⚠️ **Os números e o modelo publicado desta página ainda vêm do treino anterior, com as 14 quase duplicatas**; o BERTimbau e o TF-IDF precisam ser retreinados (`scripts/pipeline.py --de baseline`) e a tabela, atualizada.
+- O aluno recupera **~91% do F1 do professor** (0,859 / 0,942; IC95 da razão 0,87–0,95) e fica **~10 pontos acima** do baseline clássico.
+- **Incerteza (bootstrap pareado, 2.000 reamostragens, seed 42):** F1 do aluno IC95 **0,82–0,90**; aluno − TF-IDF **+0,06 a +0,14**; professor − aluno **+0,05 a +0,12**. Nenhum intervalo cruza zero, então a ordem professor > aluno > TF-IDF se sustenta; a distância exata, não. Previsões por item em [`reports/previsoes_referencia.csv`](reports/previsoes_referencia.csv) e métricas em [`reports/auditoria.json`](reports/auditoria.json) (`scripts/auditoria.py`).
+- **Ambiente da avaliação:** as métricas da tabela vêm do relatório do treino (GPU, fp16). Reavaliado em CPU fp32 (o cenário de produção), o aluno dá o mesmo F1, 0,859.
+- **Quase duplicatas:** 14 das 450 reclamações de referência (3%) tinham texto igual, após normalizar caixa e pontuação, a algum texto do treino (frases curtas como "NÃO RECEBI O PRODUTO"). **Foram retiradas do treino** (29 linhas; restam 5.971) em `scripts/amostrar.py`, com a referência intacta, e os modelos foram retreinados sem elas; a checagem em `reports/auditoria.json` confirma **0** quase duplicatas. No modelo anterior, o efeito delas era pequeno (F1 do aluno 0,841 com e 0,836 sem as 14).
 - **Custo:** o "~600×" compara com o LLM chamado uma reclamação por vez (US$ 1.086); como a qualidade de 0,942 foi medida em lotes de 20, a comparação equivalente é com US$ 308, ou seja, **~170×**.
-- Latência (mediana) medida uma reclamação por vez, nas mesmas 100 reclamações sorteadas da referência para os três modelos, num Intel Core 5 120U com 2 threads; custo do LLM pelo preço da versão paga do mesmo modelo (US$ 0,60/US$ 2,40 por milhão de tokens de entrada/saída, consultado em 03/11/2026); custo da CPU assumindo US$ 0,10/h e a vazão medida em lotes de 32 sobre as 450 da referência (56 mil reclamações/hora). Medições locais variam com a carga da máquina: em execuções seguidas, a latência do BERTimbau ficou entre 35 e 54 ms. Premissas em [`reports/latencia_custo.json`](reports/latencia_custo.json).
+- Latência (mediana) medida uma reclamação por vez, nas mesmas 100 reclamações sorteadas da referência para os três modelos, num Intel Core 5 120U com 2 threads; custo do LLM pelo preço da versão paga do mesmo modelo (US$ 0,60/US$ 2,40 por milhão de tokens de entrada/saída, consultado em 03/11/2026); custo da CPU assumindo US$ 0,10/h e a vazão medida em lotes de 32 sobre as 450 da referência (54 mil reclamações/hora). Medições locais variam com a carga da máquina: em execuções seguidas, a latência do BERTimbau ficou entre 35 e 54 ms. Premissas em [`reports/latencia_custo.json`](reports/latencia_custo.json).
 
 ![Matriz de confusão](reports/matriz_confusao.png)
 
-Os erros se concentram nas classes menores e mais vagas: `atraso_ou_entrega` (recall 0,71; confundida com `outro` e `atendimento_ou_cobranca`), `outro` (0,73) e `atendimento_ou_cobranca` (0,77). Nas quatro classes principais o recall fica entre 0,86 e 0,98. A confusão mais frequente é `defeito_ou_qualidade` → `produto_errado` (10 de 81): reclamações como "material fino, diferente da foto" ficam na fronteira das duas classes, e o próprio professor erra 7 delas da mesma forma.
+Os erros se concentram nas classes menores e mais vagas: `atraso_ou_entrega` (recall 0,71; confundida sobretudo com `outro` e `nao_recebido`), `outro` (0,80) e `atendimento_ou_cobranca` (0,86). Nas quatro classes principais o recall fica entre 0,85 e 0,97. As confusões mais frequentes são `defeito_ou_qualidade` → `produto_errado` (6 de 81) e `defeito_ou_qualidade` → `outro` (6 de 81): reclamações como "material fino, diferente da foto" ficam na fronteira das duas classes, e o próprio professor erra 7 delas da mesma forma.
 
 ## Como funciona
 
@@ -73,7 +73,7 @@ clf("Comprei 2 unidades e só veio uma na caixa.")
 ## Decisões e trade-offs
 
 - **Referência separada do treino e do ajuste:** o prompt do professor não foi iterado contra a referência; se fosse, ela deixaria de ser teste. Pelo mesmo motivo, o número de épocas foi escolhido na validação.
-- **Época escolhida na validação:** em 5 épocas, o F1 de validação foi 0,811 → 0,831 → **0,845** → 0,837 → 0,838, e a loss de validação voltou a subir depois da época 2 (início de overfitting). O checkpoint da época 3 é o usado. Um treino de 30 épocas confirmou o limite: a validação oscilou entre 0,83 e 0,85 sem tendência de alta, a loss de treino foi a ~0 (memorização) enquanto a de validação passou de 1,0, e o F1 na referência ficou igual (0,843 contra 0,844). 5 épocas bastam; o registro está em [`reports/bertimbau_30ep.json`](reports/bertimbau_30ep.json).
+- **Época escolhida na validação:** em 5 épocas, o F1 de validação foi 0,788 → 0,844 → 0,826 → 0,844 → **0,856**, e a loss de validação, que tem o mínimo na época 2 (0,365), sobe depois (0,413 → 0,443 → 0,460), enquanto o F1 de validação continua subindo até a época 5, a escolhida. Ou seja, a loss indica início de overfitting, mas o F1 não: a época 5 é o último ponto, então 5 épocas podem ainda não ser o limite. O experimento de 30 épocas ([`reports/bertimbau_30ep.json`](reports/bertimbau_30ep.json)) foi feito **com o treino anterior** (6.000 exemplos, com as quase duplicatas) e não foi repetido: nele a validação oscilou entre 0,83 e 0,85 sem tendência de alta, a loss de treino foi a ~0 (memorização) e o F1 na referência ficou igual ao de 5 épocas.
 
   ![Treino de 5 × 30 épocas](reports/epocas.png)
 - **Encoder em vez de LLM para classificar:** o BERT lê o texto inteiro uma vez e uma camada linear decide — não precisa gerar texto. Isso explica os 35 ms em CPU.
