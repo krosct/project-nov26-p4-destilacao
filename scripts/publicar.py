@@ -1,6 +1,6 @@
 """Publica o modelo no Hugging Face Hub com model card gerado a partir dos relatórios.
 
-Uso: uv run --group train python scripts/publicar.py   (HF_TOKEN no .env.shared)
+Uso: uv run --group train python scripts/publicar.py   (HF_TOKEN no .env.shared ou .env)
 """
 
 import json
@@ -98,6 +98,7 @@ clf("Comprei 2 unidades e só veio uma na caixa.")
 
 def main() -> None:
     load_dotenv(find_dotenv(".env.shared", usecwd=True))
+    load_dotenv(find_dotenv(".env", usecwd=True), override=True)  # token pode estar no .env
     api = HfApi(token=os.environ["HF_TOKEN"])
     pasta = RAIZ / "models/bertimbau-triagem"
     (pasta / "README.md").write_text(model_card())
