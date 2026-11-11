@@ -2,7 +2,7 @@
 
 Uso: uv run --group train python scripts/figuras.py
 - reports/matriz_confusao.png: BERTimbau (modelo em uso) na referência.
-- reports/epocas.png: treino curto (5 épocas) × longo (30), se os dois relatórios existirem.
+- reports/epocas.png: treino curto (5 épocas) × longo (15), se os dois relatórios existirem.
 """
 
 import json
@@ -85,7 +85,7 @@ def _rotulo_fim(ax, x, y, texto) -> None:
 
 def epocas() -> None:
     curto = RAIZ / "reports/bertimbau_5ep.json"
-    longo = RAIZ / "reports/bertimbau_30ep.json"
+    longo = RAIZ / "reports/bertimbau_15ep.json"
     if not (curto.exists() and longo.exists()):
         return
     c, lg = json.loads(curto.read_text()), json.loads(longo.read_text())
@@ -116,14 +116,14 @@ def epocas() -> None:
     ax1.set(xlabel="época", ylabel="loss (entropia cruzada)", xlim=(0.5, ep[-1] + 4))
     _titulo(
         ax1,
-        "O modelo decora o treino e piora na validação",
-        "Loss por época no treino de 30 épocas",
+        "O treino decora e a loss de validação sobe",
+        "Loss por época no treino de 15 épocas",
     )
     ax1.legend(frameon=False, fontsize=9, labelcolor=TEXTO_2, loc="upper center")
     _estilo(ax1)
 
     # 2. Sem ganho: F1 de validação estabiliza cedo; na referência os dois empatam
-    for dados, cor, nome in ((lg, AZUL, "30 épocas"), (c, LARANJA, "5 épocas")):
+    for dados, cor, nome in ((lg, AZUL, "15 épocas"), (c, LARANJA, "5 épocas")):
         h = dados["historico"]
         x, y = [p["epoca"] for p in h], [p["f1_validacao"] for p in h]
         ax2.plot(x, y, color=cor, linewidth=2, marker="o", markersize=4, label=nome)
@@ -142,11 +142,11 @@ def epocas() -> None:
     )
     _titulo(
         ax2,
-        "Mais épocas não melhoram o F1",
+        "O F1 de validação oscila; o ganho no teste é pequeno",
         # O resultado que importa é o do teste final, na referência rotulada à parte
         virgula(
             f"Teste final (450 reclamações de referência): "
-            f"5 épocas = {c['f1_macro']:.3f} · 30 épocas = {lg['f1_macro']:.3f}"
+            f"5 épocas = {c['f1_macro']:.3f} · 15 épocas = {lg['f1_macro']:.3f}"
         ),
     )
     # Legenda com as duas séries e o significado do ponto maior

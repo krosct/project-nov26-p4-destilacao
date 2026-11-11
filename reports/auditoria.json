@@ -3,25 +3,25 @@
   "n_referencia": 450,
   "f1_macro": {
     "professor": 0.942,
-    "aluno": 0.859,
+    "aluno": 0.869,
     "tfidf": 0.763
   },
   "ic95_bootstrap": {
     "aluno": [
-      0.819,
-      0.895
+      0.832,
+      0.901
     ],
     "aluno_menos_tfidf": [
-      0.057,
-      0.141
+      0.065,
+      0.15
     ],
     "prof_menos_aluno": [
-      0.046,
-      0.121
+      0.038,
+      0.108
     ],
     "razao": [
-      0.873,
-      0.951
+      0.885,
+      0.959
     ]
   },
   "reamostragens": 2000,
@@ -29,7 +29,7 @@
   "f1_macro_sem_quase_duplicatas": {
     "n": 450,
     "professor": 0.942,
-    "aluno": 0.859,
+    "aluno": 0.869,
     "tfidf": 0.763
   },
   "concordancia_professor": {

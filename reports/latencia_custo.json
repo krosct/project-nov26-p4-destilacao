@@ -8,13 +8,13 @@
   },
   "latencia_ms_p50": {
     "tfidf_cpu": 0.43,
-    "bertimbau_cpu": 35.2,
+    "bertimbau_cpu": 37.6,
     "llm_api": 3742.0
   },
   "custo_usd_por_1m_reclamacoes": {
     "llm_uma_por_requisicao": 1085.85,
     "llm_em_lotes_de_20": 308.22,
-    "bertimbau_cpu": 1.84
+    "bertimbau_cpu": 1.8
   },
   "detalhes": {
     "n_reclamacoes": 100,
@@ -24,6 +24,6 @@
       733,
       269
     ],
-    "bertimbau_reclamacoes_por_hora_cpu": 54471
+    "bertimbau_reclamacoes_por_hora_cpu": 55428
   }
 }
